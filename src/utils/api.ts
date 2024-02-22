@@ -7,7 +7,7 @@ class Api {
 
   constructor(baseUrl: string, password: string) {
     this._url = baseUrl;
-    this._password = password
+    this._password = password;
   }
 
   _getHash(): string {
@@ -35,65 +35,27 @@ class Api {
         'X-Auth': `${this._getHash()}`,
       },
       body: JSON.stringify({
-          "action": "get_ids",
-          "params": {"offset": 0, "limit": 51}         
+        "action": "get_ids",    
+        "params": {"offset": 0, "limit": 51}     
       })
     })
     .then(this._checkServerResponse)
   }
 
-  /* postTodo(todo: TodoTypes): Promise<TodoTypes> {
-    return fetch(`${this._url}/todos`, {
+  getItems(ids): Promise<Response> {
+    return fetch(`${this._url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(todo)})
-      .then((res) => {
-        if(res.ok) {
-          return res.json();
-          } else {
-            return Promise.reject(`Ошибка: ${res.status}`);
-          }
-      })
-  }
-
-
-  deleteTodo(todoId: number): Promise<TodoTypes> {
-    return fetch(`${this._url}/todos/${todoId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      })
-      .then((res) => {
-        if(res.ok) {
-          return res.json();
-          } else {
-            return Promise.reject(`Ошибка: ${res.status}`);
-          }
-      })
-  }
-
-  updateTodo(todo: TodoTypes): Promise<TodoTypes>  {
-    return fetch(`${this._url}/todos/${todo._id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
+        'X-Auth': `${this._getHash()}`,
       },
       body: JSON.stringify({
-        name: todo.name,
-        description: todo.description,
-        status: todo.status,
-    })})
-    .then((res) => {
-      if(res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Ошибка: ${res.status}`);
-      }
+        "action": "get_items",
+        "params": {"ids": ids.result}       
+      })
     })
-  } */
+    .then(this._checkServerResponse)
+  }
 }
 
 export const api = new Api('http://api.valantis.store:40000', 'Valantis');
