@@ -16,9 +16,17 @@ class Api {
     const month = ((today.getUTCMonth() + 1).toString().length === 1) ? `0${(today.getUTCMonth() + 1)}` : `${(today.getUTCMonth() + 1)}`;
     const day = ((today.getUTCDate()).toString().length === 1) ? `0${today.getUTCDate()}` : `${today.getUTCDate()}`;
     const timeStamp = year + month + day;
+    console.log(timeStamp);
     const hash = md5(`${this._password}_${timeStamp}`); 
     return hash
   }
+
+  _checkServerResponse(res) {
+    if(res.ok) {
+      return res.json();
+      } else {
+        return res.text().then(text => { throw new Error(text) })
+    }}
 
   getIds(): Promise {
     return fetch(`${this._url}`, {
@@ -29,16 +37,10 @@ class Api {
       },
       body: JSON.stringify({
           "action": "get_ids",
-          "params": {"offset": 10, "limit": 3}         
+          "params": {"offset": 0, "limit": 51}         
       })
     })
-    .then((res) => {
-      if(res.ok) {
-        return res.json();
-        } else {
-          return Promise.reject(`Ошибка: ${res.status}`);
-        }
-    })
+    .then(this._checkServerResponse)
   }
 
   /* postTodo(todo: TodoTypes): Promise<TodoTypes> {
