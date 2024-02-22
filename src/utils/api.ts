@@ -16,7 +16,6 @@ class Api {
     const month = ((today.getUTCMonth() + 1).toString().length === 1) ? `0${(today.getUTCMonth() + 1)}` : `${(today.getUTCMonth() + 1)}`;
     const day = ((today.getUTCDate()).toString().length === 1) ? `0${today.getUTCDate()}` : `${today.getUTCDate()}`;
     const timeStamp = year + month + day;
-    console.log(timeStamp);
     const hash = md5(`${this._password}_${timeStamp}`); 
     return hash
   }
