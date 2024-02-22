@@ -1,5 +1,5 @@
-import abstraktsia from '../vendor/images/abstraktsiia_geometriia_figury_93400_2560x1440.jpg'
+import newYear from '../vendor/images/fon_novyj_god_vetki_91130_1920x1080.jpg'
 
 export const pageLayout = {
-  backgroundImage: abstraktsia,
+  backgroundImage: newYear,
 }

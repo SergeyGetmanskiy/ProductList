@@ -7,6 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import { teal } from '@mui/material/colors';
 
 interface Column {
   id: 'id' | 'name' | 'brand' | 'price';
@@ -17,13 +18,13 @@ interface Column {
 }
 
 const columns: readonly Column[] = [
-  { id: 'id', label: 'Id', minWidth: 30 },
+  { id: 'id', label: 'Id', minWidth: 200 },
   { id: 'product', label: 'Название', minWidth: 100 },
-  { id: 'brand', label: 'Бренд', minWidth: 50 },
+  { id: 'brand', label: 'Бренд', minWidth: 100 },
   {
     id: 'price',
     label: 'Цена',
-    minWidth: 50,
+    minWidth: 100,
     align: 'right',
     format: (value: number) => value.toFixed(2),
   },
@@ -32,7 +33,7 @@ const columns: readonly Column[] = [
 export default function ProductList({productList}) {
   console.log(productList);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     if(event) {
@@ -46,8 +47,8 @@ export default function ProductList({productList}) {
   };
 
   return (
-    <Paper sx={{ width: '60%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 600 }}>
+    <Paper sx={{ width: '70%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 500 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -55,14 +56,14 @@ export default function ProductList({productList}) {
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth }}
+                  style={{ minWidth: column.minWidth, backgroundColor: teal[50] }}
                 >
                   {column.label}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody >
             {productList
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
@@ -85,13 +86,14 @@ export default function ProductList({productList}) {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[50, 100]}
+        rowsPerPageOptions={[25, 50, 100]}
         component="div"
         count={productList.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{backgroundColor: teal[50]}}
       />
     </Paper>
   );
