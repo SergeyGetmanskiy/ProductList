@@ -20,14 +20,14 @@ class Api {
     return hash
   }
 
-  _checkServerResponse(res) {
+  _checkServerResponse(res: Response) {
     if(res.ok) {
       return res.json();
       } else {
         return res.text().then(text => { throw new Error(text) })
     }}
 
-  getIds(): Promise {
+  getIds(): Promise<Response> {
     return fetch(`${this._url}`, {
       method: 'POST',
       headers: {
