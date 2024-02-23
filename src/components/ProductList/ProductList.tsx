@@ -11,7 +11,7 @@ import { teal } from '@mui/material/colors';
 import { useSearch } from '../../utils/hooks/useSearch';
 
 interface Column {
-  id: 'id' | 'name' | 'brand' | 'price';
+  id: 'id' | 'product' | 'brand' | 'price';
   label: string;
   minWidth?: number;
   align?: 'right';

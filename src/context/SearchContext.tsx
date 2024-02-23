@@ -1,17 +1,19 @@
 import { createContext, FC, useState, PropsWithChildren, useCallback } from 'react';
-import { FieldValues } from 'react-hook-form';
 import { api } from '../utils/api';
+import { Items } from '../types/Types';
+
+
 
 type Search = {
-  Ids: Array;
-  Items: Array;
+  Ids: string[];
+  Items: Items[];
   getIds: {
-    mutate: () => Promise<void>;
+    mutate: () => void;
     isLoading: boolean;
     errorMessage: string | null;
   };
   getItems: {
-    mutate: (data: FieldValues) => Promise<void>;
+    mutate: (data: string[]) => void;
     isLoading: boolean;
     errorMessage: string | null;
   };
@@ -33,8 +35,8 @@ export const SearchContext = createContext<Search>({
 });
 
 export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [Ids, setIds] = useState<Array>([]);
-  const [Items, setItems] = useState<Array>([]);
+  const [Ids, setIds] = useState<string[]>([]);
+  const [Items, setItems] = useState<Items[]>([]);
   const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>(null);
   const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,7 +57,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
       })
   }, []);
 
-  const getItems = useCallback((data: FieldValues) => {
+  const getItems = useCallback((data: string[]) => {
     setIsLoading(true);
     setGetItemsErrorMessage(null);
     api.getItems(data)

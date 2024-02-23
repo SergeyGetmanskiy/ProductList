@@ -1,4 +1,13 @@
 import md5 from 'md5'
+import { Items } from '../types/Types';
+
+interface GetIdsResponse extends Response {
+  result: string[];
+}
+
+interface GetItemsResponse extends Response {
+  result: Items[];
+}
 
 class Api {
 
@@ -27,7 +36,7 @@ class Api {
         return res.text().then(text => { throw new Error(text) })
     }}
 
-  getIds(): Promise<Response> {
+  getIds(): Promise<GetIdsResponse> {
     return fetch(`${this._url}`, {
       method: 'POST',
       headers: {
@@ -42,7 +51,7 @@ class Api {
     .then(this._checkServerResponse)
   }
 
-  getItems(ids): Promise<Response> {
+  getItems(ids: string[]): Promise<GetItemsResponse> {
     return fetch(`${this._url}`, {
       method: 'POST',
       headers: {
