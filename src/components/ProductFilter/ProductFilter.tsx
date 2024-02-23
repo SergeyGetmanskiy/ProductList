@@ -1,23 +1,20 @@
 import { Button } from "@mui/material"
-import { api } from "../../utils/api"
+import { useSearch } from "../../utils/hooks/useSearch"
 
-function ProductFilter({setProductList}) {
+function ProductFilter() {
 
-  const handleClick = () => {
-    api.getIds()
-    .then((res) => {
-      console.log(res);
-      api.getItems(res)
-      .then((res) => {
-        console.log(res.result);
-        setProductList(res.result);
-      })
-    })
+  const { Ids, getIds, getItems} = useSearch();
+  const handleIdsClick = () => {
+    getIds.mutate();
+  }
+  const handleItemsClick = () => {
+    getItems.mutate(Ids);
   }
 
   return (
     <>
-      <Button onClick={handleClick} variant='contained'>click me!</Button>
+      <Button onClick={handleIdsClick} variant='contained'>get Ids</Button>
+      <Button onClick={handleItemsClick} variant='contained'>get Items</Button>
     </>
   )
 }

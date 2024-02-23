@@ -51,7 +51,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_items",
-        "params": {"ids": ids.result}       
+        "params": {"ids": ids}       
       })
     })
     .then(this._checkServerResponse)

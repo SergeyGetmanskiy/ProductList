@@ -8,6 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { teal } from '@mui/material/colors';
+import { useSearch } from '../../utils/hooks/useSearch';
 
 interface Column {
   id: 'id' | 'name' | 'brand' | 'price';
@@ -30,8 +31,8 @@ const columns: readonly Column[] = [
   },
 ];
 
-export default function ProductList({productList}) {
-  console.log(productList);
+export default function ProductList() {
+  const {Items} = useSearch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
@@ -45,6 +46,10 @@ export default function ProductList({productList}) {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+/*   useEffect(() => {
+    getItems.mutate(Ids);
+  }, [Ids, getItems]) */
 
   return (
     <Paper sx={{ width: '70%', overflow: 'hidden' }}>
@@ -64,7 +69,7 @@ export default function ProductList({productList}) {
             </TableRow>
           </TableHead>
           <TableBody >
-            {productList
+            {Items
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
@@ -88,7 +93,7 @@ export default function ProductList({productList}) {
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={productList.length}
+        count={Items.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

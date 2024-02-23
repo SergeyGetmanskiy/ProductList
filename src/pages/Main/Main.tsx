@@ -1,15 +1,17 @@
 import ProductList from "../../components/ProductList/ProductList"
 import ProductFilter from "../../components/ProductFilter/ProductFilter"
-import { useState } from "react"
+import { useSearch } from "../../utils/hooks/useSearch"
 
 function Main() {
 
-  const [productList, setProductList] = useState([]);
-
+  const {Ids, Items} = useSearch();
+  console.log(Ids);
+  console.log(Items);
+  
   return (
     <>
-      <ProductFilter setProductList={setProductList} />
-      <ProductList productList={productList} />
+      <ProductFilter />
+      <ProductList />
     </>
   )
 }
