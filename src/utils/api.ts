@@ -45,7 +45,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_ids",    
-        "params": {"offset": 0, "limit": 51}     
+        "params": {"offset": 0, "limit": 500}  
       })
     })
     .then(this._checkServerResponse)

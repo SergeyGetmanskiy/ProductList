@@ -32,7 +32,7 @@ const columns: readonly Column[] = [
 ];
 
 export default function ProductList() {
-  const {Items} = useSearch();
+  const {items} = useSearch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
@@ -46,10 +46,6 @@ export default function ProductList() {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
-
-/*   useEffect(() => {
-    getItems.mutate(Ids);
-  }, [Ids, getItems]) */
 
   return (
     <Paper sx={{ width: '70%', overflow: 'hidden' }}>
@@ -69,7 +65,7 @@ export default function ProductList() {
             </TableRow>
           </TableHead>
           <TableBody >
-            {Items
+            {items
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
@@ -93,7 +89,7 @@ export default function ProductList() {
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={Items.length}
+        count={items.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

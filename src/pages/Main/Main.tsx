@@ -4,10 +4,10 @@ import { useSearch } from "../../utils/hooks/useSearch"
 
 function Main() {
 
-  const {Ids, Items} = useSearch();
-  console.log(Ids);
-  console.log(Items);
-  
+  const {ids, items} = useSearch();
+  console.log(ids);
+  console.log(items);
+
   return (
     <>
       <ProductFilter />

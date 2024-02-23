@@ -1,12 +1,11 @@
-import { createContext, FC, useState, PropsWithChildren, useCallback } from 'react';
+import { createContext, FC, useState, PropsWithChildren, useCallback, useEffect } from 'react';
+import { sortedUniq, sortedUniqBy, chunk } from 'lodash';
 import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
-
-
 type Search = {
-  Ids: string[];
-  Items: Items[];
+  ids: string[];
+  items: Items[];
   getIds: {
     mutate: () => void;
     isLoading: boolean;
@@ -20,8 +19,8 @@ type Search = {
 };
 
 export const SearchContext = createContext<Search>({
-  Ids: [],
-  Items: [],
+  ids: [],
+  items: [],
   getIds: {
     mutate: () => Promise.resolve(),
     isLoading: false,
@@ -35,8 +34,8 @@ export const SearchContext = createContext<Search>({
 });
 
 export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [Ids, setIds] = useState<string[]>([]);
-  const [Items, setItems] = useState<Items[]>([]);
+  const [ids, setIds] = useState<string[]>([]);
+  const [items, setItems] = useState<Items[]>([]);
   const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>(null);
   const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -45,16 +44,17 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     setIsLoading(true);
     setGetIdsErrorMessage(null);
     api.getIds()
-      .then((res) => {
-        setIds(res.result);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setGetIdsErrorMessage(err);
-        setIds([]);
-        setIsLoading(false);
-      })
+    .then((res) => {
+      const uniqueIds = sortedUniq(res.result);
+      setIds(uniqueIds);
+      setIsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setGetIdsErrorMessage(err);
+      setIds([]);
+      setIsLoading(false);
+    })
   }, []);
 
   const getItems = useCallback((data: string[]) => {
@@ -62,7 +62,8 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     setGetItemsErrorMessage(null);
     api.getItems(data)
     .then((res) => {
-      setItems(res.result);
+      const uniqueItems = sortedUniqBy(res.result, 'id')
+      setItems(items => [...items, ...uniqueItems]);
       setIsLoading(false);
     })
     .catch((err) => {
@@ -73,11 +74,18 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     })
   }, []);
 
+useEffect(() => {
+    const chunks = chunk(ids, 100);
+    chunks.forEach((chunk) => {
+      getItems(chunk);
+    })
+  }, [ids]);
+
   return (
     <SearchContext.Provider
       value={{
-        Ids,
-        Items,
+        ids,
+        items,
         getIds: {
           mutate: getIds,
           isLoading,
