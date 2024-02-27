@@ -86,7 +86,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
         getItems(chunk);
       })
     } else return
-  }, [ids]);
+  }, [getIds, getItems, ids]);
 
   return (
     <SearchContext.Provider
