@@ -1,49 +1,131 @@
 import { createContext, FC, useState, PropsWithChildren, useCallback, useEffect } from 'react';
-import { sortedUniq, sortedUniqBy, chunk } from 'lodash';
+import { sortedUniq, sortedUniqBy, uniq, min, max } from 'lodash';
 import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
 type Search = {
+  products: string[];
+  brands: string[];
+  prices: number[];
   ids: string[];
   items: Items[];
+  getProducts: {
+    mutate: (data: string[]) => void;
+    isLoading: boolean;
+  };
+  getBrands: {
+    mutate: (data: string[]) => void;
+    isLoading: boolean;
+  };
+  getPrices: {
+    mutate: (data: string[]) => void;
+    isLoading: boolean;
+  };
   getIds: {
     mutate: () => void;
     isLoading: boolean;
-    errorMessage: string | null;
   };
   getItems: {
     mutate: (data: string[]) => void;
     isLoading: boolean;
-    errorMessage: string | null;
   };
 };
 
 export const SearchContext = createContext<Search>({
+  products: [],
+  brands: [],
+  prices: [],
   ids: [],
   items: [],
+  getProducts: {
+    mutate: () => Promise.resolve(),
+    isLoading: false,
+  },
+  getBrands: {
+    mutate: () => Promise.resolve(),
+    isLoading: false,
+  },
+  getPrices: {
+    mutate: () => Promise.resolve(),
+    isLoading: false,
+  },
   getIds: {
     mutate: () => Promise.resolve(),
     isLoading: false,
-    errorMessage: null,
   },
   getItems: {
     mutate: () => Promise.resolve(),
     isLoading: false,
-    errorMessage: null,
   },
 });
 
 export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
+  const [products, setProducts] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [prices, setPrices] = useState<number[]>([]);
   const [ids, setIds] = useState<string[]>([]);
   const [items, setItems] = useState<Items[]>([]);
-  const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>('');
-  const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>('');
+
+  const [isProductsLoading, setIsProductsLoading] = useState<boolean>(false);
+  const [isBrandsLoading, setIsBrandsLoading] = useState<boolean>(false);
+  const [isPricesLoading, setIsPricesLoading] = useState<boolean>(false);
   const [isIdsLoading, setIsIdsLoading] = useState<boolean>(false);
   const [isItemsLoading, setIsItemsLoading] = useState<boolean>(false);
 
+  const getProducts = useCallback(() => {
+    setIsProductsLoading(true);
+    api.getFields("product")
+    .then((res) => {
+      const uniqueNames = uniq(res.result);
+      setProducts(uniqueNames);
+      setIsProductsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setProducts([]);
+      setIsProductsLoading(false);
+    })
+  }, []);
+
+  const getBrands = useCallback(() => {
+    setIsBrandsLoading(true);
+    api.getFields("brand")
+    .then((res) => {
+      const uniqueNames = uniq(res.result);
+      setBrands(uniqueNames);
+      setIsBrandsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setBrands([]);
+      setIsBrandsLoading(false);
+    })
+  }, []);
+
+  const getPrices = useCallback(() => {
+    setIsPricesLoading(true);
+    api.getFields("price")
+    .then((res) => {
+      const minPrice = parseInt(min(res.result) as string);
+      const maxPrice = parseInt(max(res.result) as string);
+      if(minPrice && maxPrice) {
+        setPrices([minPrice, maxPrice]);
+        setIsPricesLoading(false);
+      } else {
+        setPrices([0, 100]);
+        setIsPricesLoading(false);
+      }
+      
+    })
+    .catch((err) => {
+      console.log(err);
+      setPrices([]);
+      setIsPricesLoading(false);
+    })
+  }, []);
+
   const getIds = useCallback(() => {
     setIsIdsLoading(true);
-    setGetIdsErrorMessage('');
     api.getIds()
     .then((res) => {
       const uniqueIds = sortedUniq(res.result);
@@ -52,7 +134,6 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     })
     .catch((err) => {
       console.log(err);
-      setGetIdsErrorMessage(err);
       setIds([]);
       setIsIdsLoading(false);
     })
@@ -60,7 +141,6 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const getItems = useCallback((data: string[]) => {
     setIsItemsLoading(true);
-    setGetItemsErrorMessage('');
     api.getItems(data)
     .then((res) => {
       const uniqueItems = sortedUniqBy(res.result, 'id')
@@ -69,13 +149,18 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     })
     .catch((err) => {
       console.log(err);
-      setGetItemsErrorMessage(err);
       setItems([]);
       setIsItemsLoading(false);
     })
   }, []);
 
   useEffect(() => {
+    getProducts();
+    getBrands();
+    getPrices();
+  }, [getProducts, getBrands, getPrices]);
+
+  /* useEffect(() => {
     getIds();
   }, [getIds]);
 
@@ -86,22 +171,35 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
         getItems(chunk);
       })
     } else return
-  }, [isIdsLoading, ids, getItems]);
+  }, [isIdsLoading, ids, getItems]); */
 
   return (
     <SearchContext.Provider
       value={{
+        products,
+        brands,
+        prices,
         ids,
         items,
+        getProducts: {
+          mutate: getProducts,
+          isLoading: isProductsLoading,
+        },
+        getBrands: {
+          mutate: getBrands,
+          isLoading: isBrandsLoading,
+        },
+        getPrices: {
+          mutate: getPrices,
+          isLoading: isPricesLoading,
+        },
         getIds: {
           mutate: getIds,
           isLoading: isIdsLoading,
-          errorMessage: getIdsErrorMessage,
         },
         getItems: {
           mutate: getItems,
           isLoading: isItemsLoading,
-          errorMessage: getItemsErrorMessage,
         },
       }}
     >

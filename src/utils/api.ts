@@ -1,6 +1,10 @@
 import md5 from 'md5'
 import { Items } from '../types/Types';
 
+interface GetFieldsResponse extends Response {
+  result: string[];
+}
+
 interface GetIdsResponse extends Response {
   result: string[];
 }
@@ -35,6 +39,21 @@ class Api {
       } else {
         return res.text().then(text => { throw new Error(text) })
     }}
+
+  getFields(field: string): Promise<GetFieldsResponse> {
+    return fetch(`${this._url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth': `${this._getHash()}`,
+      },
+      body: JSON.stringify({
+        "action": "get_fields",    
+        "params": {"field": field, "offset": 0, "limit": 10000}  
+      })
+    })
+    .then(this._checkServerResponse)
+  }
 
   getIds(): Promise<GetIdsResponse> {
     return fetch(`${this._url}`, {

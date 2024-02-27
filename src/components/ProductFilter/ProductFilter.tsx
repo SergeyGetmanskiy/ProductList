@@ -4,14 +4,12 @@ import RangeSlider from "../RangeSlider/RangeSlider";
 import { useSearch } from "../../utils/hooks/useSearch"
 
 function ProductFilter() {
-  const {items, getItems} = useSearch();
-  const loading = getItems.isLoading;
-
+  const {products, brands, prices, getProducts, getBrands, getPrices} = useSearch();
   return (
     <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4, gap: 4}}>
-      <InputAutocomplete items={items} loading={loading} label="Поиск по названию" optionKey="product" />
-      <InputAutocomplete items={items} loading={loading} label="Поиск по бренду" optionKey="brand" />
-      <RangeSlider />
+      <InputAutocomplete items={products} loading={getProducts.isLoading} label="Поиск по названию"/>
+      <InputAutocomplete items={brands} loading={getBrands.isLoading} label="Поиск по бренду"/>
+      <RangeSlider range={prices} loading={getPrices.isLoading} />
       <Button variant="contained">Поиск</Button>
     </Paper>
   )
