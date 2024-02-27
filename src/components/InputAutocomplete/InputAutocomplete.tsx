@@ -3,6 +3,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSearch } from '../../utils/hooks/useSearch';
+import { Items } from '../../types/Types';
 
 export default function InputAutocomplete() {
   const {items, getItems} = useSearch();
@@ -10,19 +11,19 @@ export default function InputAutocomplete() {
   const [options, setOptions] = useState<readonly Items[]>([]);
   const loading = getItems.isLoading;
 
-/*   useEffect(() => {
+  useEffect(() => {
     console.log(loading, items)
     let active = true;
     if (!loading) {
       return undefined;
     } 
     if (active) {
-      setOptions([...items]);
+      setOptions([...items as Items[]]);
     }
     return () => {
       active = false;
     };
-  }, [loading]); */
+  }, [loading]);
 
   useEffect(() => {
     if (!open) {
@@ -41,13 +42,13 @@ export default function InputAutocomplete() {
       onClose={() => {
         setOpen(false);
       }}
-      isOptionEqualToValue={(option, value) => option.title === value.title}
-      getOptionLabel={(option) => option.title}
+      isOptionEqualToValue={(option, value) => option.product === value.product}
+      getOptionLabel={(option) => option.product}
       options={options}
       loading={loading}
       renderInput={(params) => (
         <TextField
-          {...params}
+          {...params} 
           label="Asynchronous"
           InputProps={{
             ...params.InputProps,

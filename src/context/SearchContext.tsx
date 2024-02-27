@@ -34,16 +34,16 @@ export const SearchContext = createContext<Search>({
 });
 
 export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [ids, setIds] = useState<string[]>(null);
+  const [ids, setIds] = useState<string[]>([]);
   const [items, setItems] = useState<Items[]>([]);
-  const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>(null);
-  const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>(null);
+  const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>('');
+  const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>('');
   const [isIdsLoading, setIsIdsLoading] = useState<boolean>(false);
   const [isItemsLoading, setIsItemsLoading] = useState<boolean>(false);
 
   const getIds = useCallback(() => {
     setIsIdsLoading(true);
-    setGetIdsErrorMessage(null);
+    setGetIdsErrorMessage('');
     api.getIds()
     .then((res) => {
       const uniqueIds = sortedUniq(res.result);
@@ -60,7 +60,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const getItems = useCallback((data: string[]) => {
     setIsItemsLoading(true);
-    setGetItemsErrorMessage([]);
+    setGetItemsErrorMessage('');
     api.getItems(data)
     .then((res) => {
       const uniqueItems = sortedUniqBy(res.result, 'id')
@@ -80,13 +80,13 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if(!getIds.isLoading) {
+    if(!isIdsLoading) {
       const chunks = chunk(ids, 100);
       chunks.forEach((chunk) => {
         getItems(chunk);
       })
     } else return
-  }, [getIds, getItems, ids]);
+  }, [isIdsLoading, ids, getItems]);
 
   return (
     <SearchContext.Provider
