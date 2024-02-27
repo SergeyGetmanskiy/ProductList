@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import ProductList from "../../components/ProductList/ProductList"
 import ProductFilter from "../../components/ProductFilter/ProductFilter"
 import { useSearch } from "../../utils/hooks/useSearch"
@@ -5,14 +6,14 @@ import { useSearch } from "../../utils/hooks/useSearch"
 function Main() {
 
   const {ids, items} = useSearch();
-  console.log(ids);
+  
   console.log(items);
 
-/*   useEffect(() => {
-    if(ids) {
-      getItems.mutate()
+  useEffect(() => {
+    if(ids?.length > 0) {
+      console.log(ids);
     }
-  }, [ids]); */
+  }, [ids]);
 
 
  /*  

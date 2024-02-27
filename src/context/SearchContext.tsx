@@ -77,7 +77,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     getIds();
-  }, []);
+  }, [getIds]);
 
   useEffect(() => {
     if(!isIdsLoading) {

@@ -12,28 +12,13 @@ export default function InputAutocomplete() {
   const loading = getItems.isLoading;
 
   useEffect(() => {
-    console.log(loading, items)
-    let active = true;
-    if (!loading) {
-      return undefined;
-    } 
-    if (active) {
+    if (items?.length > 0) {
       setOptions([...items as Items[]]);
     }
-    return () => {
-      active = false;
-    };
-  }, [loading]);
-
-  useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
+  }, [items]);
 
   return (
     <Autocomplete
-      id="asynchronous-demo"
       sx={{ width: 300 }}
       open={open}
       onOpen={() => {
@@ -43,13 +28,15 @@ export default function InputAutocomplete() {
         setOpen(false);
       }}
       isOptionEqualToValue={(option, value) => option.product === value.product}
+      getOptionKey={(option) => option.id}
       getOptionLabel={(option) => option.product}
       options={options}
       loading={loading}
+      loadingText="Загружаю..."
       renderInput={(params) => (
         <TextField
           {...params} 
-          label="Asynchronous"
+          label="Поиск по названию"
           InputProps={{
             ...params.InputProps,
             endAdornment: (
