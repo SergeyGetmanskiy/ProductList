@@ -67,5 +67,5 @@ class Api {
   }
 }
 
-export const api = new Api('http://api.valantis.store:40000', 'Valantis');
+export const api = new Api('https://api.valantis.store:41000/', 'Valantis');
 

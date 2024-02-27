@@ -65,7 +65,7 @@ export default function ProductList() {
             </TableRow>
           </TableHead>
           <TableBody >
-            {items
+            {items && items
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
@@ -89,7 +89,7 @@ export default function ProductList() {
       <TablePagination
         rowsPerPageOptions={[25, 50, 100]}
         component="div"
-        count={items.length}
+        count={items ? items.length : 0}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

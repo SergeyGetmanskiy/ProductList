@@ -1,17 +1,16 @@
-import { Button } from "@mui/material"
+import { Paper } from "@mui/material"
 import { useSearch } from "../../utils/hooks/useSearch"
+import InputAutocomplete from "../InputAutocomplete/InputAutocomplete"
 
 function ProductFilter() {
 
-  const { getIds } = useSearch();
-  const handleIdsClick = () => {
-    getIds.mutate();
-  }
+    const {getItems} = useSearch();
 
   return (
-    <>
-      <Button onClick={handleIdsClick} variant='contained'>get Ids</Button>
-    </>
+    <Paper sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4}}>
+      <InputAutocomplete />
+      <Paper>{getItems.isLoading ? "Загрузка" : null}</Paper>
+    </Paper>
   )
 }
 

@@ -4,8 +4,8 @@ import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
 type Search = {
-  ids: string[];
-  items: Items[];
+  ids: string[] | null;
+  items: Items[] | null;
   getIds: {
     mutate: () => void;
     isLoading: boolean;
@@ -19,8 +19,8 @@ type Search = {
 };
 
 export const SearchContext = createContext<Search>({
-  ids: [],
-  items: [],
+  ids: null,
+  items: null,
   getIds: {
     mutate: () => Promise.resolve(),
     isLoading: false,
@@ -34,51 +34,58 @@ export const SearchContext = createContext<Search>({
 });
 
 export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [ids, setIds] = useState<string[]>([]);
+  const [ids, setIds] = useState<string[]>(null);
   const [items, setItems] = useState<Items[]>([]);
   const [getIdsErrorMessage, setGetIdsErrorMessage] = useState<string | null>(null);
   const [getItemsErrorMessage, setGetItemsErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isIdsLoading, setIsIdsLoading] = useState<boolean>(false);
+  const [isItemsLoading, setIsItemsLoading] = useState<boolean>(false);
 
   const getIds = useCallback(() => {
-    setIsLoading(true);
+    setIsIdsLoading(true);
     setGetIdsErrorMessage(null);
     api.getIds()
     .then((res) => {
       const uniqueIds = sortedUniq(res.result);
       setIds(uniqueIds);
-      setIsLoading(false);
+      setIsIdsLoading(false);
     })
     .catch((err) => {
       console.log(err);
       setGetIdsErrorMessage(err);
       setIds([]);
-      setIsLoading(false);
+      setIsIdsLoading(false);
     })
   }, []);
 
   const getItems = useCallback((data: string[]) => {
-    setIsLoading(true);
-    setGetItemsErrorMessage(null);
+    setIsItemsLoading(true);
+    setGetItemsErrorMessage([]);
     api.getItems(data)
     .then((res) => {
       const uniqueItems = sortedUniqBy(res.result, 'id')
       setItems(items => [...items, ...uniqueItems]);
-      setIsLoading(false);
+      setIsItemsLoading(false);
     })
     .catch((err) => {
       console.log(err);
       setGetItemsErrorMessage(err);
       setItems([]);
-      setIsLoading(false);
+      setIsItemsLoading(false);
     })
   }, []);
 
-useEffect(() => {
-    const chunks = chunk(ids, 100);
-    chunks.forEach((chunk) => {
-      getItems(chunk);
-    })
+  useEffect(() => {
+    getIds();
+  }, []);
+
+  useEffect(() => {
+    if(!getIds.isLoading) {
+      const chunks = chunk(ids, 100);
+      chunks.forEach((chunk) => {
+        getItems(chunk);
+      })
+    } else return
   }, [ids]);
 
   return (
@@ -88,12 +95,12 @@ useEffect(() => {
         items,
         getIds: {
           mutate: getIds,
-          isLoading,
+          isLoading: isIdsLoading,
           errorMessage: getIdsErrorMessage,
         },
         getItems: {
           mutate: getItems,
-          isLoading,
+          isLoading: isItemsLoading,
           errorMessage: getItemsErrorMessage,
         },
       }}

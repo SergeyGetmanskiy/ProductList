@@ -8,9 +8,27 @@ function Main() {
   console.log(ids);
   console.log(items);
 
+/*   useEffect(() => {
+    if(ids) {
+      getItems.mutate()
+    }
+  }, [ids]); */
+
+
+ /*  
+  useEffect(() => {
+  if(!getIds.isLoading) {
+    const chunks = chunk(ids, 100);
+    chunks.forEach((chunk) => {
+      getItems.mutate(chunk);
+    })
+  } else return
+}, [getIds.isLoading, ids, getItems]); */
+
   return (
     <>
       <ProductFilter />
+      <br />
       <ProductList />
     </>
   )
