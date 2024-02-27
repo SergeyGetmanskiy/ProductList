@@ -5,26 +5,13 @@ import { useSearch } from "../../utils/hooks/useSearch"
 
 function Main() {
 
-  const {ids, items} = useSearch();
-  
-  console.log(items);
+  const {items} = useSearch();
 
   useEffect(() => {
-    if(ids?.length > 0) {
-      console.log(ids);
+    if(items?.length > 0) {
+      console.log(items);
     }
-  }, [ids]);
-
-
- /*  
-  useEffect(() => {
-  if(!getIds.isLoading) {
-    const chunks = chunk(ids, 100);
-    chunks.forEach((chunk) => {
-      getItems.mutate(chunk);
-    })
-  } else return
-}, [getIds.isLoading, ids, getItems]); */
+  }, [items]);
 
   return (
     <>

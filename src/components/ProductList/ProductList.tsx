@@ -94,6 +94,7 @@ export default function ProductList() {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Показывать по"
         sx={{backgroundColor: teal[50]}}
       />
     </Paper>
