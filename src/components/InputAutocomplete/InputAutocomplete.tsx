@@ -2,20 +2,20 @@ import { useState, useEffect, Fragment } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Items } from '../../types/Types';
+import { ItemsAutocomplete } from '../../types/Types';
 
 export default function InputAutocomplete({items, loading, label, optionKey}: {
-  items: Item[],
+  items: ItemsAutocomplete[],
   loading: boolean,
   label: string, 
   optionKey: string
 }) {
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<readonly Items[]>([]);
+  const [options, setOptions] = useState<readonly ItemsAutocomplete[]>([]);
 
   useEffect(() => {
     if (items?.length > 0) {
-      setOptions([...items as Items[]]);
+      setOptions([...items as ItemsAutocomplete[]]);
     }
   }, [items]);
 
@@ -29,10 +29,10 @@ export default function InputAutocomplete({items, loading, label, optionKey}: {
       onClose={() => {
         setOpen(false);
       }}
-      isOptionEqualToValue={(option, value) => option[optionKey] === value[optionKey]}
+      isOptionEqualToValue={(option, value) => option[optionKey as keyof ItemsAutocomplete] === value[optionKey as keyof ItemsAutocomplete]}
       getOptionKey={(option) => option.id}
-      getOptionLabel={(option) => option[optionKey]}
-      options={options.filter((option) => option[optionKey])}
+      getOptionLabel={(option) => option[optionKey as keyof ItemsAutocomplete]}
+      options={options.filter((option) => option[optionKey as keyof ItemsAutocomplete])}
       loading={loading}
       loadingText="Загружаю..."
       noOptionsText="Совпадений не найдено"

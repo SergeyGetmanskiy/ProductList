@@ -7,6 +7,7 @@ export default function RangeSlider() {
   const [value, setValue] = useState<number[]>([10, 40]);
 
   const handleChange = (event: Event, newValue: number | number[]) => {
+    console.log(event);
     setValue(newValue as number[]);
   };
 
