@@ -48,7 +48,7 @@ export default function ProductList() {
   };
 
   return (
-    <Paper sx={{ width: '70%', overflow: 'hidden' }}>
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 500 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
