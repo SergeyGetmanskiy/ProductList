@@ -4,8 +4,8 @@ import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
 type Search = {
-  ids: string[] | null;
-  items: Items[] | null;
+  ids: string[];
+  items: Items[];
   getIds: {
     mutate: () => void;
     isLoading: boolean;
@@ -19,8 +19,8 @@ type Search = {
 };
 
 export const SearchContext = createContext<Search>({
-  ids: null,
-  items: null,
+  ids: [],
+  items: [],
   getIds: {
     mutate: () => Promise.resolve(),
     isLoading: false,
