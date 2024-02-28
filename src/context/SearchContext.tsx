@@ -5,43 +5,35 @@ import { Items } from '../types/Types';
 
 type Search = {
   buttonDisabled: boolean;
-  getProducts: {
+  getOptions: {
     isLoading: boolean;
     products: string[];
-  };
-  getBrands: {
-    isLoading: boolean;
     brands: string[];
-  };
-  getPrices: {
-    isLoading: boolean;
     prices: number[];
+    message: string | '';
   };
   getSearchResults: {
     mutate: (product?: string, brand?: string, price?: number) => void;
     isLoading: boolean;
     searchResults: Items[];
+    message: string | '';
   };
 };
 
 export const SearchContext = createContext<Search>({
   buttonDisabled: true,  
-  getProducts: {
+  getOptions: {
     isLoading: false,
     products: [],
-  },
-  getBrands: {
-    isLoading: false,
     brands: [],
-  },
-  getPrices: {
-    isLoading: false,
     prices: [],
+    message: '',
   },
   getSearchResults: {
     mutate: () => Promise.resolve(),
     isLoading: false,
     searchResults: [],
+    message: '',
   },
 });
 
@@ -51,79 +43,18 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   const [prices, setPrices] = useState<number[]>([]);
   const [ids, setIds] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<Items[]>([]);
+  const [optionsMessage, setOptionsMessage] = useState<string>('');
+  const [searchResultsMessage, setSearchResultsMessage] = useState<string>('');
 
-  const [isProductsLoading, setIsProductsLoading] = useState<boolean>(false);
-  const [isBrandsLoading, setIsBrandsLoading] = useState<boolean>(false);
-  const [isPricesLoading, setIsPricesLoading] = useState<boolean>(false);
+  const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false);
   const [isSearchResultsLoading, setIsSearchResultsLoading] = useState<boolean>(false);
 
-  const buttonDisabled = (isProductsLoading && isBrandsLoading && isPricesLoading) || isSearchResultsLoading;
-
-  const getProducts = useCallback(() => {
-    setIsProductsLoading(true);
-    api.getFields("product")
-    .then((res) => {
-      const uniqueNames = uniq(res.result);
-      setProducts(uniqueNames);
-      setIsProductsLoading(false);
-    })
-    .catch((err) => {
-      console.log(err);
-      setProducts([]);
-      setIsProductsLoading(false);
-    })
-  }, []);
-
-  const getBrands = useCallback(() => {
-    setIsBrandsLoading(true);
-    api.getFields("brand")
-    .then((res) => {
-      const uniqueNames = uniq(res.result);
-      setBrands(uniqueNames);
-      setIsBrandsLoading(false);
-    })
-    .catch((err) => {
-      console.log(err);
-      setBrands([]);
-      setIsBrandsLoading(false);
-    })
-  }, []);
-
-  const getPrices = useCallback(() => {
-    setIsPricesLoading(true);
-    api.getFields("price")
-    .then((res) => {
-      const sortedPrices = sortBy(res.result);
-      if(sortedPrices) {
-        setPrices(sortedPrices);
-        setIsPricesLoading(false);
-      } else {
-        setPrices([0, 100]);
-        setIsPricesLoading(false);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      setPrices([]);
-      setIsPricesLoading(false);
-    })
-  }, []);
-
-  const getIds = useCallback(() => {
-    api.getIds()
-    .then((res) => {
-      const uniqueIds = sortedUniq(res.result);
-      setIds(uniqueIds);
-    })
-    .catch((err) => {
-      console.log(err);
-      setIds([]);
-    })
-  }, []);
-
+  const buttonDisabled = isOptionsLoading || isSearchResultsLoading;
+  
   const getSearchResults = useCallback(async (product?: string, brand?: string, price?: number) => {
     setSearchResults([]);
     setIsSearchResultsLoading(true);
+    setSearchResultsMessage('');
     Promise.all([
       api.filter("product", product),
       api.filter("brand", brand),
@@ -136,7 +67,11 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
         (priceIds.result.length > 0) ? priceIds.result : ids
       );
       const uniqueIds = sortedUniq(result);
-      if(uniqueIds.length > 100) {
+      if (uniqueIds.length === 0) {
+        setSearchResults([]);
+        setIsSearchResultsLoading(false);
+        setSearchResultsMessage('Ничего не найдено.')
+      } else if(uniqueIds.length > 100) {
         const chunks = chunk(uniqueIds, 100);
         const requests = chunks.map(chunk => api.getItems(chunk))
         Promise.all(requests)
@@ -156,6 +91,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
           console.log(err);
           setSearchResults([]);
           setIsSearchResultsLoading(false);
+          setSearchResultsMessage('Произошла ошибка. Нажмите на "Поиск" ещё раз.');
         })
       }
     })
@@ -163,36 +99,57 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
       console.log(err);
       setSearchResults([]);
       setIsSearchResultsLoading(false);
+      setSearchResultsMessage('Произошла ошибка. Нажмите на "Поиск" ещё раз.');
     })
   }, [ids]);
 
   useEffect(() => {
-    getIds();
-    getProducts();
-    getBrands();
-    getPrices();
-  }, [getIds, getProducts, getBrands, getPrices]);
+    setIsOptionsLoading(true);
+    setOptionsMessage('');
+    Promise.all([
+      api.getIds(),
+      api.getFields("product"),
+      api.getFields("brand"),
+      api.getFields("price"),
+    ])
+    .then(([ ids, products, brands, prices ]) => {
+      const uniqueIds = sortedUniq(ids.result);
+      const uniqueProducts = uniq(products.result);
+      const uniqueBrands = uniq(brands.result);
+      const sortedPrices = sortBy(prices.result);
+      setIds(uniqueIds);
+      setProducts(uniqueProducts);
+      setBrands(uniqueBrands);
+      if(sortedPrices) {
+        setPrices(sortedPrices);
+      } else {
+        setPrices([0, 100]);
+      }
+      setIsOptionsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setOptionsMessage("Произошла ошибка. Перезагрузите страницу.")
+      setIsOptionsLoading(false);
+    })
+  }, []);
 
   return (
     <SearchContext.Provider
       value={{ 
         buttonDisabled,
-        getProducts: {
-          isLoading: isProductsLoading,
+        getOptions: {
+          isLoading: isOptionsLoading,
           products,
-        },
-        getBrands: {
-          isLoading: isBrandsLoading,
           brands,
-        },
-        getPrices: {
-          isLoading: isPricesLoading,
           prices,
+          message: optionsMessage,
         },
         getSearchResults: {
           mutate: getSearchResults,
           isLoading: isSearchResultsLoading,
           searchResults,
+          message: searchResultsMessage,
         },
       }}
     >
