@@ -1,16 +1,17 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, Dispatch, SetStateAction } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 
-export default function InputAutocomplete({items, loading, label}: {
+export default function InputAutocomplete({items, loading, label, setValue}: {
   items: string[],
   loading: boolean,
-  label: string, 
+  label: string,
+  setValue: Dispatch<SetStateAction<''>> 
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<readonly string[]>([]);
-
+  
   useEffect(() => {
     if (items?.length > 0) {
       setOptions([...items]);
@@ -19,6 +20,13 @@ export default function InputAutocomplete({items, loading, label}: {
 
   return (
     <Autocomplete
+      onChange={(event: Event, newValue: string) => {
+        if(newValue) {
+          setValue(newValue);
+        } else {
+          setValue('');
+        }
+      }}
       sx={{ width: 300 }}
       open={open}
       onOpen={() => {

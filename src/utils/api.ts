@@ -49,7 +49,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_fields",    
-        "params": {"field": field, "offset": 0, "limit": 10000}  
+        "params": {"field": field, "offset": 0, "limit": 1000}  
       })
     })
     .then(this._checkServerResponse)
@@ -64,7 +64,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_ids",    
-        "params": {"offset": 0, "limit": 500}  
+        "params": {"offset": 0, "limit": 1000}  
       })
     })
     .then(this._checkServerResponse)
@@ -80,6 +80,21 @@ class Api {
       body: JSON.stringify({
         "action": "get_items",
         "params": {"ids": ids}       
+      })
+    })
+    .then(this._checkServerResponse)
+  }
+
+  filter(field: string, value: string | number): Promise<string[]> {
+    return fetch(`${this._url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth': `${this._getHash()}`,
+      },
+      body: JSON.stringify({
+        "action": "filter",
+        "params": {[field]: value}       
       })
     })
     .then(this._checkServerResponse)

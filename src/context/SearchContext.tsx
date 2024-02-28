@@ -1,61 +1,47 @@
 import { createContext, FC, useState, PropsWithChildren, useCallback, useEffect } from 'react';
-import { sortedUniq, sortedUniqBy, uniq, min, max } from 'lodash';
+import { sortedUniq, sortedUniqBy, uniq, intersection, chunk, sortBy } from 'lodash';
 import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
 type Search = {
-  products: string[];
-  brands: string[];
-  prices: number[];
-  ids: string[];
-  items: Items[];
+  buttonDisabled: boolean;
   getProducts: {
-    mutate: (data: string[]) => void;
     isLoading: boolean;
+    products: string[];
   };
   getBrands: {
-    mutate: (data: string[]) => void;
     isLoading: boolean;
+    brands: string[];
   };
   getPrices: {
-    mutate: (data: string[]) => void;
     isLoading: boolean;
+    prices: number[];
   };
-  getIds: {
-    mutate: () => void;
+  getSearchResults: {
+    mutate: (product?: string, brand?: string, price?: number) => void;
     isLoading: boolean;
-  };
-  getItems: {
-    mutate: (data: string[]) => void;
-    isLoading: boolean;
+    searchResults: Items[];
   };
 };
 
 export const SearchContext = createContext<Search>({
-  products: [],
-  brands: [],
-  prices: [],
-  ids: [],
-  items: [],
+  buttonDisabled: true,  
   getProducts: {
-    mutate: () => Promise.resolve(),
     isLoading: false,
+    products: [],
   },
   getBrands: {
-    mutate: () => Promise.resolve(),
     isLoading: false,
+    brands: [],
   },
   getPrices: {
-    mutate: () => Promise.resolve(),
     isLoading: false,
+    prices: [],
   },
-  getIds: {
+  getSearchResults: {
     mutate: () => Promise.resolve(),
     isLoading: false,
-  },
-  getItems: {
-    mutate: () => Promise.resolve(),
-    isLoading: false,
+    searchResults: [],
   },
 });
 
@@ -64,13 +50,14 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   const [brands, setBrands] = useState<string[]>([]);
   const [prices, setPrices] = useState<number[]>([]);
   const [ids, setIds] = useState<string[]>([]);
-  const [items, setItems] = useState<Items[]>([]);
+  const [searchResults, setSearchResults] = useState<Items[]>([]);
 
   const [isProductsLoading, setIsProductsLoading] = useState<boolean>(false);
   const [isBrandsLoading, setIsBrandsLoading] = useState<boolean>(false);
   const [isPricesLoading, setIsPricesLoading] = useState<boolean>(false);
-  const [isIdsLoading, setIsIdsLoading] = useState<boolean>(false);
-  const [isItemsLoading, setIsItemsLoading] = useState<boolean>(false);
+  const [isSearchResultsLoading, setIsSearchResultsLoading] = useState<boolean>(false);
+
+  const buttonDisabled = (isProductsLoading && isBrandsLoading && isPricesLoading) || isSearchResultsLoading;
 
   const getProducts = useCallback(() => {
     setIsProductsLoading(true);
@@ -106,16 +93,14 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
     setIsPricesLoading(true);
     api.getFields("price")
     .then((res) => {
-      const minPrice = parseInt(min(res.result) as string);
-      const maxPrice = parseInt(max(res.result) as string);
-      if(minPrice && maxPrice) {
-        setPrices([minPrice, maxPrice]);
+      const sortedPrices = sortBy(res.result);
+      if(sortedPrices) {
+        setPrices(sortedPrices);
         setIsPricesLoading(false);
       } else {
         setPrices([0, 100]);
         setIsPricesLoading(false);
       }
-      
     })
     .catch((err) => {
       console.log(err);
@@ -125,81 +110,89 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   const getIds = useCallback(() => {
-    setIsIdsLoading(true);
     api.getIds()
     .then((res) => {
       const uniqueIds = sortedUniq(res.result);
       setIds(uniqueIds);
-      setIsIdsLoading(false);
     })
     .catch((err) => {
       console.log(err);
       setIds([]);
-      setIsIdsLoading(false);
     })
   }, []);
 
-  const getItems = useCallback((data: string[]) => {
-    setIsItemsLoading(true);
-    api.getItems(data)
-    .then((res) => {
-      const uniqueItems = sortedUniqBy(res.result, 'id')
-      setItems(items => [...items, ...uniqueItems]);
-      setIsItemsLoading(false);
+  const getSearchResults = useCallback(async (product?: string, brand?: string, price?: number) => {
+    setSearchResults([]);
+    setIsSearchResultsLoading(true);
+    Promise.all([
+      api.filter("product", product),
+      api.filter("brand", brand),
+      api.filter("price", price) 
+    ])
+    .then(([ productIds, brandIds, priceIds ]) => {
+      const result = intersection(
+        (productIds.result.length > 0) ? productIds.result : ids,
+        (brandIds.result.length > 0) ? brandIds.result : ids,
+        (priceIds.result.length > 0) ? priceIds.result : ids
+      );
+      const uniqueIds = sortedUniq(result);
+      if(uniqueIds.length > 100) {
+        const chunks = chunk(uniqueIds, 100);
+        const requests = chunks.map(chunk => api.getItems(chunk))
+        Promise.all(requests)
+        .then((res) => {
+          const result = res.map(item => item.result).flat();
+          const uniqueItems = sortedUniqBy(result, 'id');
+          setSearchResults(searchResults => [...searchResults, ...uniqueItems]);
+          setIsSearchResultsLoading(false);
+        })
+      } else {
+        api.getItems(uniqueIds)
+        .then((res) => {
+          setSearchResults(res.result);
+          setIsSearchResultsLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setSearchResults([]);
+          setIsSearchResultsLoading(false);
+        })
+      }
     })
     .catch((err) => {
       console.log(err);
-      setItems([]);
-      setIsItemsLoading(false);
+      setSearchResults([]);
+      setIsSearchResultsLoading(false);
     })
-  }, []);
+  }, [ids]);
 
   useEffect(() => {
+    getIds();
     getProducts();
     getBrands();
     getPrices();
-  }, [getProducts, getBrands, getPrices]);
-
-  /* useEffect(() => {
-    getIds();
-  }, [getIds]);
-
-  useEffect(() => {
-    if(!isIdsLoading) {
-      const chunks = chunk(ids, 100);
-      chunks.forEach((chunk) => {
-        getItems(chunk);
-      })
-    } else return
-  }, [isIdsLoading, ids, getItems]); */
+  }, [getIds, getProducts, getBrands, getPrices]);
 
   return (
     <SearchContext.Provider
-      value={{
-        products,
-        brands,
-        prices,
-        ids,
-        items,
+      value={{ 
+        buttonDisabled,
         getProducts: {
-          mutate: getProducts,
           isLoading: isProductsLoading,
+          products,
         },
         getBrands: {
-          mutate: getBrands,
           isLoading: isBrandsLoading,
+          brands,
         },
         getPrices: {
-          mutate: getPrices,
           isLoading: isPricesLoading,
+          prices,
         },
-        getIds: {
-          mutate: getIds,
-          isLoading: isIdsLoading,
-        },
-        getItems: {
-          mutate: getItems,
-          isLoading: isItemsLoading,
+        getSearchResults: {
+          mutate: getSearchResults,
+          isLoading: isSearchResultsLoading,
+          searchResults,
         },
       }}
     >

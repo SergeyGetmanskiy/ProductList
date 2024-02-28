@@ -32,7 +32,8 @@ const columns: readonly Column[] = [
 ];
 
 export default function ProductList() {
-  const {items} = useSearch();
+  const {getSearchResults} = useSearch();
+  const items = getSearchResults.searchResults;
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
