@@ -67,7 +67,6 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
       api.filter("price", price) 
     ])
     .then(([ productIds, brandIds, priceIds ]) => {
-      console.log(productIds)
       const result = intersection(
         (productIds.result.length > 0) ? productIds.result : ids,
         (brandIds.result.length > 0) ? brandIds.result : ids,
