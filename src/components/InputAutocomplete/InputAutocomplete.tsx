@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Fragment, Dispatch, SetStateAction, SyntheticEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -7,7 +7,7 @@ export default function InputAutocomplete({items, loading, label, setValue}: {
   items: string[],
   loading: boolean,
   label: string,
-  setValue: Dispatch<SetStateAction<''>> 
+  setValue: Dispatch<SetStateAction<string | ''>> 
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<readonly string[]>([]);
@@ -20,7 +20,8 @@ export default function InputAutocomplete({items, loading, label, setValue}: {
 
   return (
     <Autocomplete
-      onChange={(event: Event, newValue: string) => {
+    // @ts-expect-error: event declared but never used
+      onChange={(event: SyntheticEvent<Element, Event>, newValue: string | null) => {
         if(newValue) {
           setValue(newValue);
         } else {

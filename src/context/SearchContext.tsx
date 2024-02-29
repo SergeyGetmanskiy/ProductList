@@ -4,7 +4,7 @@ import { api } from '../utils/api';
 import { Items } from '../types/Types';
 
 type Search = {
-  buttonDisabled: boolean;
+  isLoading: boolean;
   getOptions: {
     isLoading: boolean;
     products: string[];
@@ -13,7 +13,7 @@ type Search = {
     message: string | '';
   };
   getSearchResults: {
-    mutate: (product?: string, brand?: string, price?: number) => void;
+    mutate: (product: string, brand: string, price: number) => void;
     isLoading: boolean;
     searchResults: Items[];
     message: string | '';
@@ -21,7 +21,7 @@ type Search = {
 };
 
 export const SearchContext = createContext<Search>({
-  buttonDisabled: true,  
+  isLoading: false,  
   getOptions: {
     isLoading: false,
     products: [],
@@ -49,9 +49,15 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false);
   const [isSearchResultsLoading, setIsSearchResultsLoading] = useState<boolean>(false);
 
-  const buttonDisabled = isOptionsLoading || isSearchResultsLoading;
+  const isLoading = isOptionsLoading || isSearchResultsLoading;
   
-  const getSearchResults = useCallback(async (product?: string, brand?: string, price?: number) => {
+  const getSearchResults = useCallback(async (product: string, brand: string, price: number) => {
+    const handleError = (err: Error) => {
+      console.log(err);
+      setSearchResults([]);
+      setIsSearchResultsLoading(false);
+      setSearchResultsMessage('Произошла ошибка. Нажмите на "Поиск" ещё раз.');
+    }
     setSearchResults([]);
     setIsSearchResultsLoading(true);
     setSearchResultsMessage('');
@@ -61,6 +67,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
       api.filter("price", price) 
     ])
     .then(([ productIds, brandIds, priceIds ]) => {
+      console.log(productIds)
       const result = intersection(
         (productIds.result.length > 0) ? productIds.result : ids,
         (brandIds.result.length > 0) ? brandIds.result : ids,
@@ -81,6 +88,9 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
           setSearchResults(searchResults => [...searchResults, ...uniqueItems]);
           setIsSearchResultsLoading(false);
         })
+        .catch((err) => {
+          handleError(err);
+        })
       } else {
         api.getItems(uniqueIds)
         .then((res) => {
@@ -88,18 +98,12 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
           setIsSearchResultsLoading(false);
         })
         .catch((err) => {
-          console.log(err);
-          setSearchResults([]);
-          setIsSearchResultsLoading(false);
-          setSearchResultsMessage('Произошла ошибка. Нажмите на "Поиск" ещё раз.');
+          handleError(err);
         })
       }
     })
     .catch((err) => {
-      console.log(err);
-      setSearchResults([]);
-      setIsSearchResultsLoading(false);
-      setSearchResultsMessage('Произошла ошибка. Нажмите на "Поиск" ещё раз.');
+      handleError(err);
     })
   }, [ids]);
 
@@ -116,7 +120,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
       const uniqueIds = sortedUniq(ids.result);
       const uniqueProducts = uniq(products.result);
       const uniqueBrands = uniq(brands.result);
-      const sortedPrices = sortBy(prices.result);
+      const sortedPrices = sortBy(prices.result).map((price) => parseInt(price));
       setIds(uniqueIds);
       setProducts(uniqueProducts);
       setBrands(uniqueBrands);
@@ -137,7 +141,7 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <SearchContext.Provider
       value={{ 
-        buttonDisabled,
+        isLoading,
         getOptions: {
           isLoading: isOptionsLoading,
           products,

@@ -13,7 +13,7 @@ export default function RangeSlider({range, loading, setValue, value}: {range: n
     <Box sx={{ width: 400, display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Stack sx={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 2}}>
         <Typography align='center'>Выберите цену</Typography>
-        <Button onClick={() => setValue(0)} size='sm' variant='outlined'>Сброс</Button>
+        <Button onClick={() => setValue(0)} size='small' variant='outlined'>Сброс</Button>
       </Stack>
       <Slider
         value={value}

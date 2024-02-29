@@ -21,7 +21,7 @@ const style = {
   p: 4,
 };
 
-export default function LoadingPopup({open}) {
+export default function LoadingPopup({open}: {open: boolean}) {
   return (
     <div>
       <Modal

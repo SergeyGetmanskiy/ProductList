@@ -13,6 +13,10 @@ interface GetItemsResponse extends Response {
   result: Items[];
 }
 
+interface FilterResponse extends Response {
+  result: string[];
+}
+
 class Api {
 
   private _url: string
@@ -85,7 +89,7 @@ class Api {
     .then(this._checkServerResponse)
   }
 
-  filter(field: string, value: string | number): Promise<string[]> {
+  filter(field: string, value: string | number): Promise<FilterResponse> {
     return fetch(`${this._url}`, {
       method: 'POST',
       headers: {
