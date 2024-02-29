@@ -45,10 +45,8 @@ export const SearchProvider: FC<PropsWithChildren> = ({ children }) => {
   const [searchResults, setSearchResults] = useState<Items[]>([]);
   const [optionsMessage, setOptionsMessage] = useState<string>('');
   const [searchResultsMessage, setSearchResultsMessage] = useState<string>('');
-
   const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false);
   const [isSearchResultsLoading, setIsSearchResultsLoading] = useState<boolean>(false);
-
   const isLoading = isOptionsLoading || isSearchResultsLoading;
   
   const getSearchResults = useCallback(async (product: string, brand: string, price: number) => {

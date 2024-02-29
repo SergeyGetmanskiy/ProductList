@@ -1,30 +1,52 @@
-# React + TypeScript + Vite
+# Тестовое задание на вакансию фронтенд разработчика
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение, которое отображает список товаров по заданным критериям поиска (название, цена, бренд).
 
-Currently, two official plugins are available:
+## Стек:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React, TypeScript, Vite, Material UI.
 
-## Expanding the ESLint configuration
+## Реализация:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Поисковый интерфейс. Два инпута (поиск по названию, поиск по бренду), слайдер (выбор цены, при этом для выбора доступны только реально существующие в базе данных цены), кнопка сброса выбранной цены, кнопка "Поиск". Поиск может осуществляться по всем параметрам, либо по каждому в отдельности. При этом кнопка "Поиск" универсальная, обрабатывает все виды поиска.
+- Экран вывода результатов поиска. Для каждого товара в списке отображается его id, название, цена и бренд. По списку осуществляется пагинация в обе стороны. Возможность выбора количества выводимых товаров на одну страницу. Дубли товаров по id в результаты поиска не попадают.
+- Информационный попап на время поиска.
+- Информационная строка, появляющаяся в случае получения сообщения об ошибке либо сообщения об отсутствии результатов поиска.
 
-- Configure the top-level `parserOptions` property like this:
+## Инструкция по сборке и запуску:
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+Склонируй репозиторий
+
+```bash
+git clone https://github.com/SergeyGetmanskiy/ProductList
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Перейди в папку репозитория
+
+```bash
+cd ProductList
+```
+
+Установи зависимости
+
+```bash
+npm install
+```
+
+Запусти приложение в дев-режиме:
+
+```bash
+npm run dev
+```
+
+Создай продакшн-сборку :
+
+```bash
+npm run build
+```
+
+Запусти приложение в превью-режиме :
+
+```bash
+npm run preview
+```

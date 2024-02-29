@@ -53,7 +53,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_fields",    
-        "params": {"field": field, "offset": 0, "limit": 1000}  
+        "params": {"field": field, "offset": 0, "limit": 10000}  
       })
     })
     .then(this._checkServerResponse)
@@ -68,7 +68,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_ids",    
-        "params": {"offset": 0, "limit": 1000}  
+        "params": {"offset": 0, "limit": 10000}  
       })
     })
     .then(this._checkServerResponse)
