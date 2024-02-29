@@ -1,12 +1,20 @@
 import md5 from 'md5'
 import { Items } from '../types/Types';
 
+interface GetFieldsResponse extends Response {
+  result: string[];
+}
+
 interface GetIdsResponse extends Response {
   result: string[];
 }
 
 interface GetItemsResponse extends Response {
   result: Items[];
+}
+
+interface FilterResponse extends Response {
+  result: string[];
 }
 
 class Api {
@@ -36,6 +44,21 @@ class Api {
         return res.text().then(text => { throw new Error(text) })
     }}
 
+  getFields(field: string): Promise<GetFieldsResponse> {
+    return fetch(`${this._url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth': `${this._getHash()}`,
+      },
+      body: JSON.stringify({
+        "action": "get_fields",    
+        "params": {"field": field, "offset": 0, "limit": 1000}  
+      })
+    })
+    .then(this._checkServerResponse)
+  }
+
   getIds(): Promise<GetIdsResponse> {
     return fetch(`${this._url}`, {
       method: 'POST',
@@ -45,7 +68,7 @@ class Api {
       },
       body: JSON.stringify({
         "action": "get_ids",    
-        "params": {"offset": 0, "limit": 500}  
+        "params": {"offset": 0, "limit": 1000}  
       })
     })
     .then(this._checkServerResponse)
@@ -61,6 +84,21 @@ class Api {
       body: JSON.stringify({
         "action": "get_items",
         "params": {"ids": ids}       
+      })
+    })
+    .then(this._checkServerResponse)
+  }
+
+  filter(field: string, value: string | number): Promise<FilterResponse> {
+    return fetch(`${this._url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth': `${this._getHash()}`,
+      },
+      body: JSON.stringify({
+        "action": "filter",
+        "params": {[field]: value}       
       })
     })
     .then(this._checkServerResponse)

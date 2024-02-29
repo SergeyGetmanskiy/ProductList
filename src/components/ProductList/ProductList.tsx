@@ -32,7 +32,8 @@ const columns: readonly Column[] = [
 ];
 
 export default function ProductList() {
-  const {items} = useSearch();
+  const {getSearchResults} = useSearch();
+  const items = getSearchResults.searchResults;
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
@@ -48,7 +49,7 @@ export default function ProductList() {
   };
 
   return (
-    <Paper sx={{ width: '70%', overflow: 'hidden' }}>
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 500 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
